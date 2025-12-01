@@ -84,7 +84,7 @@ function gameLoop() {
 
     // Duvar çarpması kontrolü (yılan kendi üzerine çarpmaz)
     if(head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-        alert("Game Over! Skorunuz: " + score);
+        alert("Oyun bitti ama kuzum kazandi skor: " , "1000000000");
         snake = [{x: Math.floor(canvas.width/2 / grid) * grid, y: Math.floor(canvas.height/2 / grid) * grid}];
         dx = grid;
         dy = 0;
