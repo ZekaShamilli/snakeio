@@ -9,6 +9,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-direction: column;
         height: 100vh;
         margin: 0;
         background-color: #222;
@@ -19,11 +20,10 @@
         border: 2px solid #fff;
     }
     .controls {
-        position: fixed;
-        bottom: 20px;
         display: flex;
         flex-direction: column;
         gap: 10px;
+        margin-top: 10px;
     }
     .row {
         display: flex;
@@ -43,7 +43,7 @@
 </head>
 <body>
 
-<canvas id="gameCanvas" width="400" height="400"></canvas>
+<canvas id="gameCanvas"></canvas>
 
 <div class="controls">
     <div class="row">
@@ -60,8 +60,13 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const grid = 20;
-let snake = [{x: 200, y: 200}];
+// Canvas boyutunu ekran boyutuna göre ayarla
+const smallerSide = Math.min(window.innerWidth, window.innerHeight) - 20;
+canvas.width = smallerSide;
+canvas.height = smallerSide;
+
+const grid = Math.floor(smallerSide / 20); // Kare sayısı ekran boyutuna göre
+let snake = [{x: Math.floor(canvas.width/2 / grid) * grid, y: Math.floor(canvas.height/2 / grid) * grid}];
 let dx = grid;
 let dy = 0;
 let food = spawnFood();
@@ -79,7 +84,7 @@ function gameLoop() {
 
     if(head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snakeCollision(head)) {
         alert("Game Over! Skorunuz: " + score);
-        snake = [{x: 200, y: 200}];
+        snake = [{x: Math.floor(canvas.width/2 / grid) * grid, y: Math.floor(canvas.height/2 / grid) * grid}];
         dx = grid;
         dy = 0;
         score = 0;
@@ -110,13 +115,13 @@ function snakeCollision(head) {
     return snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
 }
 
-// Dokunmatik ve buton kontrolleri
+// Buton kontrolleri
 document.getElementById('up').addEventListener('click', () => { if(dy === 0){ dx=0; dy=-grid; }});
 document.getElementById('down').addEventListener('click', () => { if(dy === 0){ dx=0; dy=grid; }});
 document.getElementById('left').addEventListener('click', () => { if(dx === 0){ dx=-grid; dy=0; }});
 document.getElementById('right').addEventListener('click', () => { if(dx === 0){ dx=grid; dy=0; }});
 
-// Kaydırma hareketi ile kontrol
+// Kaydırma ile kontrol
 let touchStartX = 0, touchStartY = 0;
 canvas.addEventListener('touchstart', e => {
     const touch = e.touches[0];
@@ -137,7 +142,8 @@ canvas.addEventListener('touchend', e => {
     }
 });
 
-setInterval(gameLoop, 150);
+// Yılan hızını azalt (interval artırıldı)
+setInterval(gameLoop, 250);
 </script>
 
 </body>
