@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake.io Mobile</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #222;
+        touch-action: none;
+    }
+    canvas {
+        background-color: #111;
+        border: 2px solid #fff;
+    }
+    .controls {
+        position: fixed;
+        bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    button {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        border-radius: 10px;
+        border: none;
+        background-color: #444;
+        color: white;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+<div class="controls">
+    <div class="row">
+        <button id="up">↑</button>
+    </div>
+    <div class="row">
+        <button id="left">←</button>
+        <button id="down">↓</button>
+        <button id="right">→</button>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const grid = 20;
+let snake = [{x: 200, y: 200}];
+let dx = grid;
+let dy = 0;
+let food = spawnFood();
+let score = 0;
+
+function spawnFood() {
+    return {
+        x: Math.floor(Math.random() * canvas.width / grid) * grid,
+        y: Math.floor(Math.random() * canvas.height / grid) * grid
+    };
+}
+
+function gameLoop() {
+    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+    if(head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snakeCollision(head)) {
+        alert("Game Over! Skorunuz: " + score);
+        snake = [{x: 200, y: 200}];
+        dx = grid;
+        dy = 0;
+        score = 0;
+        food = spawnFood();
+        return;
+    }
+
+    snake.unshift(head);
+
+    if(head.x === food.x && head.y === food.y) {
+        score++;
+        food = spawnFood();
+    } else {
+        snake.pop();
+    }
+
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, grid, grid);
+
+    ctx.fillStyle = "lime";
+    snake.forEach(segment => ctx.fillRect(segment.x, segment.y, grid, grid));
+}
+
+function snakeCollision(head) {
+    return snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
+}
+
+// Dokunmatik ve buton kontrolleri
+document.getElementById('up').addEventListener('click', () => { if(dy === 0){ dx=0; dy=-grid; }});
+document.getElementById('down').addEventListener('click', () => { if(dy === 0){ dx=0; dy=grid; }});
+document.getElementById('left').addEventListener('click', () => { if(dx === 0){ dx=-grid; dy=0; }});
+document.getElementById('right').addEventListener('click', () => { if(dx === 0){ dx=grid; dy=0; }});
+
+// Kaydırma hareketi ile kontrol
+let touchStartX = 0, touchStartY = 0;
+canvas.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+});
+canvas.addEventListener('touchend', e => {
+    const touch = e.changedTouches[0];
+    let dxTouch = touch.clientX - touchStartX;
+    let dyTouch = touch.clientY - touchStartY;
+
+    if(Math.abs(dxTouch) > Math.abs(dyTouch)){
+        if(dxTouch > 0 && dx === 0){ dx = grid; dy = 0; }
+        if(dxTouch < 0 && dx === 0){ dx = -grid; dy = 0; }
+    } else {
+        if(dyTouch > 0 && dy === 0){ dx = 0; dy = grid; }
+        if(dyTouch < 0 && dy === 0){ dx = 0; dy = -grid; }
+    }
+});
+
+setInterval(gameLoop, 150);
+</script>
+
+</body>
+</html>
