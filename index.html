@@ -65,7 +65,7 @@ const smallerSide = Math.min(window.innerWidth, window.innerHeight) - 20;
 canvas.width = smallerSide;
 canvas.height = smallerSide;
 
-const grid = Math.floor(smallerSide / 20); // Kare sayısı ekran boyutuna göre
+const grid = Math.floor(smallerSide / 20);
 let snake = [{x: Math.floor(canvas.width/2 / grid) * grid, y: Math.floor(canvas.height/2 / grid) * grid}];
 let dx = grid;
 let dy = 0;
@@ -82,7 +82,8 @@ function spawnFood() {
 function gameLoop() {
     const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-    if(head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snakeCollision(head)) {
+    // Duvar çarpması kontrolü (yılan kendi üzerine çarpmaz)
+    if(head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
         alert("Game Over! Skorunuz: " + score);
         snake = [{x: Math.floor(canvas.width/2 / grid) * grid, y: Math.floor(canvas.height/2 / grid) * grid}];
         dx = grid;
@@ -92,8 +93,10 @@ function gameLoop() {
         return;
     }
 
+    // Yılanın başını ekle
     snake.unshift(head);
 
+    // Yem kontrolü
     if(head.x === food.x && head.y === food.y) {
         score++;
         food = spawnFood();
@@ -101,18 +104,17 @@ function gameLoop() {
         snake.pop();
     }
 
+    // Ekranı temizle
     ctx.fillStyle = "#111";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Yem çiz
     ctx.fillStyle = "red";
     ctx.fillRect(food.x, food.y, grid, grid);
 
+    // Yılan çiz
     ctx.fillStyle = "lime";
     snake.forEach(segment => ctx.fillRect(segment.x, segment.y, grid, grid));
-}
-
-function snakeCollision(head) {
-    return snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
 }
 
 // Buton kontrolleri
@@ -142,7 +144,7 @@ canvas.addEventListener('touchend', e => {
     }
 });
 
-// Yılan hızını azalt (interval artırıldı)
+// Daha yavaş yılan
 setInterval(gameLoop, 250);
 </script>
 
